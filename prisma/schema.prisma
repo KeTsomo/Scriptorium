@@ -1,166 +1,150 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 model User {
-  id            Int      @id @default(autoincrement())
-  firstName     String
-  lastName      String
-  email         String   @unique
-  password      String
-  avatar        String?  // Optional avatar URL
-  phoneNumber   String?  // Optional phone number
-  role          String   @default("user")  // Can be "user" or "admin"
-  templates     Template[]
-  blogPosts     BlogPost[]
-  comments      Comment[]
-  reports       Report[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model CodeExecution {
-  id             Int      @id @default(autoincrement())
-  code           String   // Code submitted by the user or visitor
-  language       String   // Supported languages: C, C++, Java, Python, JavaScript
-  stdin          String?  // Optional standard input provided by the user
-  output         String   // Output of the code execution
-  error          String?  // Error message (compile/runtime errors)
-  status         String   // "success", "error", "timeout", "isolated"
-  containerId    String?  // Tracks the Docker container ID for the code execution
-  executionTime  Int      // Execution time in milliseconds
-  memoryUsed     Int      // Memory used in MB
-  timeLimit      Int      // Time limit set for this execution
-  memoryLimit    Int      // Memory limit set for this execution
-  user           User?    @relation(fields: [userId], references: [id])
-  userId         Int?     // Optional: If the user is authenticated
-  createdAt      DateTime @default(now())
+  id              Int              @id @default(autoincrement())
+  firstName       String
+  lastName        String
+  email           String           @unique
+  password        String
+  avatar          String?
+  phoneNumber     String?
+  role            String           @default("user")
+  templates       Template[]
+  blogPosts       BlogPost[]
+  comments        Comment[]
+  reports         Report[]
+  createdAt       DateTime         @default(now())
+  codeExecutions  CodeExecution[]
+  ratings         Rating[]
+  userPreferences UserPreferences?
 }
 
 model Template {
-  id          Int      @id @default(autoincrement())
-  title       String
-  explanation String
-  tags        String[]
-  code        String
-  language    String   // C, C++, Java, Python, JavaScript
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  isFork      Boolean  @default(false)
-  forkedFrom  Template? @relation("Fork", fields: [forkedFromId], references: [id])
-  forkedFromId Int?     // If this template is a fork
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              Int              @id @default(autoincrement())
+  title           String
+  explanation     String
+  code            String
+  isFork          Boolean          @default(false)
+  forkedFrom      Template?        @relation("Fork", fields: [forkedFromId], references: [id])
+  forkedFromId    Int?
+  forkedTemplates Template[]       @relation("Fork")
+  userId          Int
+  user            User             @relation(fields: [userId], references: [id])
+  tags            TemplateTag[]
+  blogPosts       BlogPost[]       @relation("BlogPostTemplates")
+  TemplateSearch  TemplateSearch[]
+}
+
+model TemplateTag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  templateId Int
+  template   Template @relation(fields: [templateId], references: [id])
 }
 
 model BlogPost {
-  id          Int       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   title       String
   description String
-  tags        String[]
-  user        User      @relation(fields: [userId], references: [id])
   userId      Int
-  templates   Template[]  // Templates referenced in the blog post
+  user        User          @relation(fields: [userId], references: [id])
+  tags        BlogPostTag[]
+  templates   Template[]    @relation("BlogPostTemplates")
   comments    Comment[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  reports     Report[]
+  ratings     Rating[]
+  BlogSearch  BlogSearch[]
 }
 
-
-model ExecutionEnvironment {
-  id          Int      @id @default(autoincrement())
-  containerId String   // The ID of the Docker container
-  status      String   // "running", "completed", "timeout", "failed"
-  language    String   // Programming language being executed in the environment
-  timeLimit   Int      // Maximum execution time in milliseconds
-  memoryLimit Int      // Maximum memory usage in MB
-  codeExecution CodeExecution @relation(fields: [codeExecutionId], references: [id])
-  codeExecutionId Int
-  createdAt   DateTime @default(now())
-  destroyedAt DateTime? // Timestamp of when the container was destroyed
+model BlogPostTag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  blogPostId Int
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id])
 }
 
 model Comment {
-  id         Int        @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   content    String
-  user       User       @relation(fields: [userId], references: [id])
   userId     Int
-  blogPost   BlogPost   @relation(fields: [blogPostId], references: [id])
-  blogPostId Int
-  parentId   Int?       // For reply comments
-  replies    Comment[]  @relation("CommentReplies")
-  rating     Int        @default(0) // Upvote or downvote
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-}
-
-model Rating {
-  id         Int      @id @default(autoincrement())
-  value      Int      // Either 1 (upvote) or -1 (downvote)
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
   blogPostId Int?
-  comment    Comment?  @relation(fields: [commentId], references: [id])
-  commentId  Int?
-  createdAt  DateTime  @default(now())
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  parentId   Int?
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies    Comment[] @relation("CommentReplies")
+  rating     Int       @default(0)
+  reports    Report[]
+  Rating     Rating[]
 }
 
 model Report {
-  id         Int        @id @default(autoincrement())
-  reason     String     // Reason for the report
-  user       User       @relation(fields: [userId], references: [id])
+  id         Int       @id @default(autoincrement())
+  reason     String
   userId     Int
-  blogPost   BlogPost?  @relation(fields: [blogPostId], references: [id])
-  blogPostId Int?       // Optional: Report is for a blog post
-  comment    Comment?   @relation(fields: [commentId], references: [id])
-  commentId  Int?       // Optional: Report is for a comment
-  createdAt  DateTime   @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+  blogPostId Int?
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  commentId  Int?
+  comment    Comment?  @relation(fields: [commentId], references: [id])
 }
 
-model ExecutionConfig {
-  id          Int      @id @default(autoincrement())
-  language    String   // C, C++, Java, Python, JavaScript
-  timeout     Int      // Max execution time in milliseconds
-  memoryLimit Int      // Memory limit in MB
+model Rating {
+  id         Int       @id @default(autoincrement())
+  value      Int
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id])
+  blogPostId Int?
+  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
+  commentId  Int?
+  comment    Comment?  @relation(fields: [commentId], references: [id])
 }
-
 
 model UserPreferences {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  darkMode   Boolean  @default(false) // Dark mode preference
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
+  theme  String @default("light")
+}
+
+model CodeExecution {
+  id                   Int                    @id @default(autoincrement())
+  code                 String
+  language             String
+  memoryLimit          Int
+  userId               Int?
+  user                 User?                  @relation(fields: [userId], references: [id])
+  ExecutionEnvironment ExecutionEnvironment[]
+}
+
+model ExecutionEnvironment {
+  id              Int           @id @default(autoincrement())
+  memoryLimit     Int
+  codeExecutionId Int
+  codeExecution   CodeExecution @relation(fields: [codeExecutionId], references: [id])
 }
 
 model TemplateSearch {
-  id        Int      @id @default(autoincrement())
-  template  Template @relation(fields: [templateId], references: [id])
+  id         Int      @id @default(autoincrement())
+  title      String
+  tags       String
+  content    String
   templateId Int
-  title     String
-  tags      String[]
-  content   String
+  template   Template @relation(fields: [templateId], references: [id])
 }
 
 model BlogSearch {
-  id        Int      @id @default(autoincrement())
-  blogPost  BlogPost @relation(fields: [blogPostId], references: [id])
+  id         Int      @id @default(autoincrement())
+  title      String
+  tags       String
+  content    String
   blogPostId Int
-  title     String
-  tags      String[]
-  content   String
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id])
 }
-
