@@ -1,6 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 export const prisma = new PrismaClient();
 
+import bcrypt from 'bcrypt';
+
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
@@ -31,10 +34,19 @@ export default async function handler(req, res) {
             password: hashedPassword,
             avatar,
             phoneNumber
+        },
+        //return these fields for the user
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+            phoneNumber: true
         }
+
     });
 
-    //create token??
 
     return res.status(201).json({ message: "User created successfully", user });
 
