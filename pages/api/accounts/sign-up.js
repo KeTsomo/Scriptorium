@@ -16,6 +16,18 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "Please fill all fields" });
     }
 
+    //check if the avatar is valid by seeing if it's in the list of valid avatars
+    const validAvatars = [
+        "/avatars/avatar1.png",
+        "/avatars/avatar2.png",
+        "/avatars/avatar3.png"];
+    
+    if (!validAvatars.includes(avatar)) {
+        return res.status(400).json({ error: "Invalid avatar selection" });
+    }
+
+
+
     //check if email already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
