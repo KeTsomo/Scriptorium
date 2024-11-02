@@ -1,42 +1,49 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../../../utils/db';
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+    // Only accept POST requests for searching
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    // Get the search query from the request body
     const { query } = req.body;
 
-    try {
-      const codeTemplates = await prisma.template.findMany({
-        where: {
-          OR: [
-            { title: { contains: query, mode: 'insensitive' } },
-            { explanation: { contains: query, mode: 'insensitive' } },
-            { code: { contains: query, mode: 'insensitive' } },
-            {
-              tags: {
-                some: {
-                  name: { contains: query, mode: 'insensitive' }
-                }
-              }
-            }
-          ]
-        },
-        select: {
-          id: true,
-          title: true,
-          explanation: true,
-          code: true,
-          tags: {
-            select: { name: true }
-          }
-        }
-      });
-
-      return res.status(200).json({ codeTemplates });
-    } catch (error) {
-      return res.status(500).json({ message: "Error retrieving templates" });
+    if (!query) {
+        return res.status(400).json({ error: 'Search query cannot be empty.' });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed.' });
-  }
+
+    try {
+        // Search for templates where title, explanation, code, or tags match the query
+        const codeTemplates = await prisma.template.findMany({
+            where: {
+                OR: [
+                    { title: { contains: query } },
+                    { explanation: { contains: query } },
+                    { code: { contains: query } },
+                    {
+                        tags: {
+                            some: {
+                                name: { contains: query }
+                            }
+                        }
+                    }
+                ]
+            },
+            select: {
+                id: true,
+                title: true,
+                explanation: true,
+                code: true,
+                tags: {
+                    select: { name: true }
+                }
+            }
+        });
+
+        return res.status(200).json({ codeTemplates });
+    } catch (error) {
+        console.error('Error retrieving templates:', error);
+        return res.status(500).json({ error: 'Error retrieving templates' });
+    }
 }
