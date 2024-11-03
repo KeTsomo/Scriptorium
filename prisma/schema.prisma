@@ -50,17 +50,20 @@ model TemplateTag {
 }
 
 model BlogPost {
-  id          Int           @id @default(autoincrement())
-  title       String
-  description String
-  userId      Int
-  user        User          @relation(fields: [userId], references: [id])
-  tags        BlogPostTag[]
-  templates   Template[]    @relation("BlogPostTemplates")
-  comments    Comment[]
-  reports     Report[]
-  ratings     Rating[]
-  BlogSearch  BlogSearch[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  description  String
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  tags         BlogPostTag[]
+  templates    Template[]    @relation("BlogPostTemplates")
+  comments     Comment[]
+  reports      Report[]
+  ratings      Rating[]      // Connect to Rating model for upvote/downvote tracking
+  BlogSearch   BlogSearch[]
+  upvoteCount  Int           @default(0) // Track the count of upvotes
+  downvoteCount Int          @default(0) // Track the count of downvotes
+  isHidden    Boolean        @default(false)
 }
 
 model BlogPostTag {
@@ -71,18 +74,22 @@ model BlogPostTag {
 }
 
 model Comment {
-  id         Int       @id @default(autoincrement())
-  content    String
-  userId     Int
-  user       User      @relation(fields: [userId], references: [id])
-  blogPostId Int?
-  blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
-  parentId   Int?
-  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  replies    Comment[] @relation("CommentReplies")
-  rating     Int       @default(0)
-  reports    Report[]
-  Rating     Rating[]
+  id            Int       @id @default(autoincrement())
+  content       String
+  userId        Int
+  user          User      @relation(fields: [userId], references: [id])
+  blogPostId    Int?
+  blogPost      BlogPost? @relation(fields: [blogPostId], references: [id])
+  parentId      Int?
+  parent        Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies       Comment[] @relation("CommentReplies")
+  rating        Int       @default(0) // Optional: Track a combined rating if needed
+  reports       Report[]
+  ratings       Rating[]  // Connect to Rating model for upvote/downvote tracking
+  upvoteCount   Int       @default(0) // Track the count of upvotes
+  downvoteCount Int       @default(0) // Track the count of downvotes
+  isHidden    Boolean        @default(false)
+
 }
 
 model Report {
@@ -98,13 +105,13 @@ model Report {
 
 model Rating {
   id         Int       @id @default(autoincrement())
-  value      Int
-  userId     Int
+  userId     Int       // User who is rating
   user       User      @relation(fields: [userId], references: [id])
-  blogPostId Int?
+  blogPostId Int?      // Connect to BlogPost if this rating is for a blog post
   blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
-  commentId  Int?
+  commentId  Int?      // Connect to Comment if this rating is for a comment
   comment    Comment?  @relation(fields: [commentId], references: [id])
+  isUpvote   Boolean   // true for upvote, false for downvote
 }
 
 model UserPreferences {
