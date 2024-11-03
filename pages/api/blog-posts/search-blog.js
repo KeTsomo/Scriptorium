@@ -17,6 +17,7 @@ export default async function handler(req, res) {
         // Search for blog posts where title, description, tags, or related template titles match the query
         const blogPosts = await prisma.blogPost.findMany({
             where: {
+                isHidden: false,
                 OR: [
                     { title: { contains: query } },
                     { description: { contains: query } },
