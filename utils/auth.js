@@ -27,7 +27,7 @@ export function verifyToken(token) {
     if (!token?.startsWith("Bearer ")) {
         return null;
     }
-
+ 
     token = token.split("Bearer ")[1];
 
     try {
