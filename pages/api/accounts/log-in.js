@@ -22,8 +22,8 @@ export default async function handler(req, res) {
         }
 
         // generate tokens for the user if the password is correct
-        const accessToken = generateAccessToken({ userId: user.id, email: user.email });
-        const refreshToken = generateRefreshToken({ userId: user.id, email: user.email });
+        const accessToken = generateAccessToken({ userId: user.id, email: user.email, role: user.role });
+        const refreshToken = generateRefreshToken({ userId: user.id, email: user.email, role: user.role });
 
         return res.status(200).json( { accessToken, refreshToken });
     } else {
