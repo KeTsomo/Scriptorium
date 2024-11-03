@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Unauthorized or invalid token.' });
     }
 
-    const { title, explanation, code, tags } = req.body;
+    const { title, explanation, code, tags, blogPostIds } = req.body;
 
     // Validate required fields, users can choose if they don't want to add tags.
     if (!title || !explanation || !code) {
@@ -32,9 +32,12 @@ export default async function handler(req, res) {
                 userId: verifiedUser.userId, // Link the template to the authenticated user
                 tags: {
                     create: tags.map(tag => ({ name: tag }))
+                },
+                blogPosts:{
+                    connect: blogPostIds.map(id => ({ id })) // link to existing blog posts by ID
                 }
             },
-            include: { tags: true } // Include tags in the response for confirmation
+            include: { tags: true, blogPosts: true } // Include tags in the response for confirmation
         });
 
         return res.status(201).json({ message: 'Template saved successfully', template });
