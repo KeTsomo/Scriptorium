@@ -63,6 +63,7 @@ model BlogPost {
   BlogSearch   BlogSearch[]
   upvoteCount  Int           @default(0) // Track the count of upvotes
   downvoteCount Int          @default(0) // Track the count of downvotes
+  isHidden    Boolean        @default(false)
 }
 
 model BlogPostTag {
@@ -87,6 +88,8 @@ model Comment {
   ratings       Rating[]  // Connect to Rating model for upvote/downvote tracking
   upvoteCount   Int       @default(0) // Track the count of upvotes
   downvoteCount Int       @default(0) // Track the count of downvotes
+  isHidden    Boolean        @default(false)
+
 }
 
 model Report {
