@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-export const prisma = new PrismaClient();
-
+import prisma from '../../../utils/db';
 import bcrypt from 'bcrypt';
 
 
@@ -9,7 +7,7 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { firstName, lastName, email, password, avatar, phoneNumber } = req.body;
+    const { firstName, lastName, email, password, avatar, phoneNumber, role } = req.body;
 
     //left avatar and phoneNumber optional
     if (!firstName || !lastName || !email || !password) {
@@ -25,8 +23,6 @@ export default async function handler(req, res) {
     if (!validAvatars.includes(avatar)) {
         return res.status(400).json({ error: "Invalid avatar selection" });
     }
-
-
 
     //check if email already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -45,7 +41,8 @@ export default async function handler(req, res) {
             email,
             password: hashedPassword,
             avatar,
-            phoneNumber
+            phoneNumber,
+            role
         },
         //return these fields for the user
         select: {
@@ -54,7 +51,8 @@ export default async function handler(req, res) {
             lastName: true,
             email: true,
             avatar: true,
-            phoneNumber: true
+            phoneNumber: true,
+            role: true
         }
 
     });
