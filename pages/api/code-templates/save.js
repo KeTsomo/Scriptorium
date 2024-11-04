@@ -7,6 +7,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // from chat gpt "verify admin with verifyToken"
     const verifiedUser = verifyToken(req.headers.authorization);
 
     if (!verifiedUser) {
