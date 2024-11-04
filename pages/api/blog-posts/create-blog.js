@@ -14,7 +14,6 @@ export default async function handler(req, res) {
 
     if (method === 'POST') {//POST = create a new blog post
 
-       
         const { title, description, tags, templateIds } = req.body;
 
         if (!title || !description) {
@@ -55,7 +54,11 @@ export default async function handler(req, res) {
         try {
             //update the blog post with the specified fields
             const blogPost = await prisma.blogPost.update({
-                where: { id: Number(id) },
+                where: { 
+                    id: Number(id),
+                    isHidden: false // only allow the author to edit blog posts that are not hidden
+
+                },
                 data: {
                     title,
                     description,
