@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fetch blog posts with upvote and downvote counts, along with their associated comments
+    //fetch blog posts with upvote and downvote counts, along with their associated comments
     const blogPosts = await prisma.blogPost.findMany({
       select: {
         id: true,
@@ -25,12 +25,11 @@ export default async function handler(req, res) {
       },
     });
 
-    // Process each blog post to calculate rating scores and sort comments
+    //calculate rating scores and sort comments
     const sortedBlogPosts = blogPosts.map((post) => {
-      // Calculate the rating score for each blog post
       const ratingScore = post.upvoteCount - post.downvoteCount;
 
-      // Sort comments for each post by rating score (upvotes - downvotes)
+      //sort comments for each post by rating score (upvotes - downvotes)
       const sortedComments = post.comments
         .map((comment) => ({
           ...comment,
@@ -38,7 +37,7 @@ export default async function handler(req, res) {
         }))
         .sort((a, b) => b.ratingScore - a.ratingScore); // Sort by rating score descending
 
-      // Return the blog post with calculated rating score and sorted comments
+      //return the blog post with calculated rating score and sorted comments
       return {
         ...post,
         ratingScore,
@@ -46,10 +45,10 @@ export default async function handler(req, res) {
       };
     });
 
-    // Sort blog posts by rating score in descending order
+    //sort blog posts by rating score in descending order
     sortedBlogPosts.sort((a, b) => b.ratingScore - a.ratingScore);
 
-    // Return sorted blog posts with their sorted comments
+    //return sorted blog posts with their sorted comments
     return res.status(200).json({
       message: 'Blog posts and comments sorted by rating retrieved successfully!',
       blogPosts: sortedBlogPosts,
