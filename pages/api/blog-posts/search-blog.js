@@ -16,21 +16,27 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Search query cannot be empty.' });
         }
 
+        // try catch helped by ChatGPT, prompt was "help me write a try catch block to search for blog posts matching query in title, description, tags, or related template titles"
         try {
-            // fetch blog posts that match the search query in title, description, tags, or template title
             const blogPosts = await prisma.blogPost.findMany({
+
                 where: {
+                    isHidden: false,
                     OR: [
-                        { title: { contains: query, mode: 'insensitive' } },
-                        { description: { contains: query, mode: 'insensitive' } },
+                        { title: { contains: query } },
+                        { description: { contains: query } },
                         {
                             tags: {
-                                some: { name: { contains: query, mode: 'insensitive' } }
+                                some: {
+                                    name: { contains: query }
+                                }
                             }
                         },
                         {
                             templates: {
-                                some: { title: { contains: query, mode: 'insensitive' } }
+                                some: {
+                                    title: { contains: query }
+                                }
                             }
                         }
                     ]
@@ -73,6 +79,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Template ID is required for this action.' });
         }
 
+        // try catch helped by ChatGPT and co-pilot autocomplete, prompt was "help me handle actions like view, run, and fork on a code template based on template ID"
         try {
             // retrieve the template based on templateId
             const template = await prisma.template.findUnique({
