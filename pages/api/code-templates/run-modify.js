@@ -1,8 +1,6 @@
 import prisma from '../../../utils/db';
 import { verifyToken } from '../../../utils/auth';
 
-//1. we first need to allow both visators and authenticated users to fetch an existing code template
-// and modify the template.
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
