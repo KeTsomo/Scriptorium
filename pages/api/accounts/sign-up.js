@@ -1,4 +1,6 @@
-import prisma from '../../../utils/db';
+import { PrismaClient } from '@prisma/client';
+export const prisma = new PrismaClient();
+
 import bcrypt from 'bcrypt';
 
 
@@ -7,21 +9,11 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { firstName, lastName, email, password, avatar, phoneNumber, role } = req.body;
+    const { firstName, lastName, email, password, avatar, phoneNumber } = req.body;
 
     //left avatar and phoneNumber optional
     if (!firstName || !lastName || !email || !password) {
         return res.status(400).json({ error: "Please fill all fields" });
-    }
-
-    //check if the avatar is valid by seeing if it's in the list of valid avatars
-    const validAvatars = [
-        "/avatars/avatar1.png",
-        "/avatars/avatar2.png",
-        "/avatars/avatar3.png"];
-    
-    if (!validAvatars.includes(avatar)) {
-        return res.status(400).json({ error: "Invalid avatar selection" });
     }
 
     //check if email already exists
@@ -41,8 +33,7 @@ export default async function handler(req, res) {
             email,
             password: hashedPassword,
             avatar,
-            phoneNumber,
-            role
+            phoneNumber
         },
         //return these fields for the user
         select: {
@@ -51,8 +42,7 @@ export default async function handler(req, res) {
             lastName: true,
             email: true,
             avatar: true,
-            phoneNumber: true,
-            role: true
+            phoneNumber: true
         }
 
     });
