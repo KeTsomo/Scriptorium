@@ -30,6 +30,7 @@ export default async function handler(req, res) {
       const ratingScore = post.upvoteCount - post.downvoteCount;
 
       //sort comments for each post by rating score (upvotes - downvotes)
+      //Copilot suggested using map instead of forEach to sort comments
       const sortedComments = post.comments
         .map((comment) => ({
           ...comment,
