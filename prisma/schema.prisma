@@ -106,11 +106,15 @@ model Report {
 model Rating {
   id         Int       @id @default(autoincrement())
   userId     Int       // User who is rating
+  userId     Int       // User who is rating
   user       User      @relation(fields: [userId], references: [id])
+  blogPostId Int?      // Connect to BlogPost if this rating is for a blog post
   blogPostId Int?      // Connect to BlogPost if this rating is for a blog post
   blogPost   BlogPost? @relation(fields: [blogPostId], references: [id])
   commentId  Int?      // Connect to Comment if this rating is for a comment
+  commentId  Int?      // Connect to Comment if this rating is for a comment
   comment    Comment?  @relation(fields: [commentId], references: [id])
+  isUpvote   Boolean   // true for upvote, false for downvote
   isUpvote   Boolean   // true for upvote, false for downvote
 }
 
