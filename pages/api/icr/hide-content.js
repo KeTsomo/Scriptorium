@@ -14,7 +14,6 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'Unauthorized. You must be an admin!' });
     }
 
-    // from gpt and copilot autofill "generate a try catch block that hides content"
     if (req.method === 'PUT') {
         const { blogPostId, commentId } = req.body;
         
@@ -23,6 +22,7 @@ export default async function handler(req, res) {
         }
 
         try {
+            // got if statement structure from chat gpt
             if (blogPostId) {
                 // find the inappropriate blog post
                 const blogPost = await prisma.blogPost.update({

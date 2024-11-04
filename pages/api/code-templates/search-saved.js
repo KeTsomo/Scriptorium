@@ -45,6 +45,7 @@ export default async function handler(req, res) {
         }
 
         // allow a user to search through their saved templates by title, explanation, or tags
+        // followed similar structure from search.js
         const savedTemplates = await prisma.template.findMany({
             where: {
                 userId: Number(userId),

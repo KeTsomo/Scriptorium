@@ -30,7 +30,7 @@ export default async function handler(req, res) {
                 }
             });
 
-            // from gpt, "modify the if statement to allow a blog post author to view hidden posts"
+            // from chat gpt, "modify the if statement to allow a blog post author to view hidden posts"
             if (blogPost) {
                 if (blogPost.isHidden && blogPost.userId !== userId) {
                     return res.status(404).json({ error: 'Blog post not found.' });

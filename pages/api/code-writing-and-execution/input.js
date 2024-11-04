@@ -26,8 +26,9 @@ export default async function handler(req, res) {
         // create temporary file to write in
         const filePath = path.join('/tmp', fileName);
 
+        // asked chat gpt to "modify try catch block to include standard input"
         try {
-            // from copilot
+            // from copilot autofill
             await fs.promises.writeFile(filePath, code);
 
             // compile code if the language requires it
